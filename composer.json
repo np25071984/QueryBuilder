@@ -1,0 +1,15 @@
+{
+    "name": "np25071984/query-builder",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nikolai Poriadin",
+            "email": "np25071984@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"np25071984\\QueryBuilder\\": "src/"}
+    },
+    "require": {}
+}
