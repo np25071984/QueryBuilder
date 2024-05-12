@@ -31,16 +31,20 @@ class FromClause
                 $this->tables[] = $value;
                 break;
         }
-
     }
 
-    public function toSql(): string
+    public function getTables(): array
     {
-        $tables = [];
-        foreach($this->tables as $tbl) {
-            $tables[] = $tbl->toSql();
-        }
-
-        return "FROM " . implode(", ", $tables);
+        return $this->tables;
     }
+
+    // public function toSql(): string
+    // {
+    //     $tables = [];
+    //     foreach($this->tables as $tbl) {
+    //         $tables[] = $tbl->toSql();
+    //     }
+
+    //     return "FROM " . implode(", ", $tables);
+    // }
 }

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace np25071984\QueryBuilder;
 
-use RuntimeException;
-
 class SelectClause
 {
-    /** @var ColumnClause[] $columns */
+    /** @var ColumnClause|Query[] $columns */
     private $columns = [];
 
     public function __construct(string|array|ColumnClause|Query $value) {
@@ -27,7 +25,7 @@ class SelectClause
                             $this->columns[] = $val;
                             break;
                         case $val instanceof Query:
-                            $this->columns[] = new ColumnClause("({$val->toSql()})", $val->alias);
+                            $this->columns[] = $val;
                             break;
                     }
                 }
@@ -36,23 +34,13 @@ class SelectClause
                 $this->columns[] = $value;
                 break;
             case $value instanceof Query:
-                $this->columns[] = new ColumnClause("({$value->toSql()})", "aaa");
+                $this->columns[] = $value;
                 break;
-            }
-
+        }
     }
 
-    public function toSql(): string
+    public function getColumns(): array
     {
-        /**
-         * TODO: implementation should be part of a driver (injected as Strategy design pattern)
-         * MySQL, PostreSQL, Oracle, etc drivers
-         */
-        $columns = [];
-        foreach($this->columns as $col) {
-            $columns[] = $col->toSql();
-        }
-
-        return "SELECT " . implode(", ", $columns);
+        return $this->columns;
     }
 }

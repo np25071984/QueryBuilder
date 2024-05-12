@@ -2,26 +2,22 @@
 
 declare(strict_types=1);
 
-namespace np25071984\QueryBuilder;
+namespace np25071984\QueryBuilder\Converters;
 
+use np25071984\QueryBuilder\Query;
+use np25071984\QueryBuilder\ColumnClause;
+use np25071984\QueryBuilder\TableClause;
+use np25071984\QueryBuilder\ConditionClause;
 use np25071984\QueryBuilder\Operators\OperatorOr;
 use np25071984\QueryBuilder\Operators\OperatorAnd;
 
-readonly class Query
+class MySqlConverter
 {
-    public function __construct(
-        public SelectClause $selectClause, // TODO: DeleteClause, UpdateClause
-        public FromClause $fromClause,
-        public ?WhereClause $whereClause = null,
-        readonly public ?string $alias = null,
-    ) {
-    }
-
-    public function toSql(): string
+    public function convertToSql(Query $query): string
     {
         $sql = "";
         $columns = [];
-        foreach ($this->selectClause->getColumns() as $column) {
+        foreach ($query->selectClause->getColumns() as $column) {
             switch (true) {
                 case $column instanceof ColumnClause:
                     if (is_null($column->alias)) {
@@ -38,7 +34,7 @@ readonly class Query
         $sql .= "SELECT " . implode(", ", $columns);
 
         $tables = [];
-        foreach ($this->fromClause->getTables() as $table) {
+        foreach ($query->fromClause->getTables() as $table) {
             switch (true) {
                 case $table instanceof TableClause:
                     if (is_null($table->alias)) {
@@ -54,9 +50,9 @@ readonly class Query
         }
         $sql .= " FROM " . implode(", ", $tables);
 
-        if (!is_null($this->whereClause)) {
+        if (!is_null($query->whereClause)) {
             $conditions = [];
-            foreach ($this->whereClause->getConditions() as $condition) {
+            foreach ($query->whereClause->getConditions() as $condition) {
                 switch(true) {
                     case $condition instanceof ConditionClause:
                         $conditions[] = $this->processConditionClause($condition);

@@ -6,5 +6,5 @@ namespace np25071984\QueryBuilder\Operators;
 
 interface OperatorInterface
 {
-    public function toSql(): string;
+    // public function toSql(): string;
 }

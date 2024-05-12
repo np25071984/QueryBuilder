@@ -8,11 +8,11 @@ use np25071984\QueryBuilder\ConditionClause;
 
 class WhereClause
 {
-        /** @var ConditionClause[] $columns */
+        /** @var OperatorInterface[] $columns */
         private $conditions = [];
 
         public function __construct(array|ConditionClause $value) {
-            // TODO: validate input
+            // TODO: validate input; it is either a single ConditionClause or array of OperatorInterfaces
             switch (true) {
                 case is_array($value):
                     foreach($value as $val) {
@@ -23,16 +23,20 @@ class WhereClause
                     $this->conditions[] = $value;
                     break;
             }
-
         }
 
-        public function toSql(): string
+        public function getConditions(): array
         {
-            $conditions = [];
-            foreach($this->conditions as $tbl) {
-                $conditions[] = $tbl->toSql();
-            }
-
-            return "WHERE " . implode(" AND ", $conditions);
+            return $this->conditions;
         }
+
+        // public function toSql(): string
+        // {
+        //     $conditions = [];
+        //     foreach($this->conditions as $tbl) {
+        //         $conditions[] = $tbl->toSql();
+        //     }
+
+        //     return "WHERE " . implode(" AND ", $conditions);
+        // }
 }
