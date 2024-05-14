@@ -8,9 +8,11 @@ use np25071984\QueryBuilder\ConditionClause;;
 
 readonly class OperatorOr implements OperatorInterface
 {
+    public array $conditions;
+
     public function __construct(
-        public ConditionClause|OperatorInterface $conditionClauseLeft,
-        public ConditionClause|OperatorInterface $conditionClauseRight,
+        ConditionClause|OperatorInterface ...$conditions,
     ) {
+        $this->conditions = $conditions;
     }
 }

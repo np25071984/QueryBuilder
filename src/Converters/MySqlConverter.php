@@ -119,66 +119,43 @@ class MySqlConverter
 
     private function processOperatorOr(OperatorOr $operator): string
     {
-        $leftClause = $operator->conditionClauseLeft;
-        $rightClause = $operator->conditionClauseRight;
-
-        switch (true) {
-            case $leftClause instanceof OperatorOr:
-                $left = "(" . $this->processOperatorOr($leftClause) . ")";
-                break;
-            case $leftClause instanceof OperatorAnd:
-                $left = "(" . $this->processOperatorAnd($leftClause) . ")";
-                break;
-            case $leftClause instanceof ConditionClause:
-                $left = "{$leftClause->name} {$leftClause->operator} {$leftClause->value}";
-                break;
+        $conditions = [];
+        foreach ($operator->conditions as $condition) {
+            switch (true) {
+                case $condition instanceof OperatorOr:
+                    $cond = "(" . $this->processOperatorOr($condition) . ")";
+                    break;
+                case $condition instanceof OperatorAnd:
+                    $cond = "(" . $this->processOperatorAnd($condition) . ")";
+                    break;
+                case $condition instanceof ConditionClause:
+                    $cond = "{$condition->name} {$condition->operator} {$condition->value}";
+                    break;
+            }
+            $conditions[] = $cond;
         }
 
-        switch (true) {
-            case $rightClause instanceof OperatorOr:
-                $right = "(" . $this->processOperatorOr($rightClause) . ")";
-                break;
-            case $rightClause instanceof OperatorAnd:
-                $right = "(" . $this->processOperatorAnd($rightClause) . ")";
-                break;
-            case $rightClause instanceof ConditionClause:
-                $right = "{$rightClause->name} {$rightClause->operator} {$rightClause->value}";
-                break;
-        }
-
-        return "{$left} OR {$right}";
+        return implode(" OR ", $conditions);
     }
 
     private function processOperatorAnd(OperatorAnd $operator): string
     {
-        $leftClause = $operator->conditionClauseLeft;
-        $rightClause = $operator->conditionClauseRight;
-
-        switch (true) {
-            case $leftClause instanceof OperatorOr:
-                $left = "(" . $this->processOperatorOr($leftClause) . ")";
-                break;
-            case $leftClause instanceof OperatorAnd:
-                $left = "(" . $this->processOperatorAnd($leftClause) . ")";
-                break;
-            case $leftClause instanceof ConditionClause:
-                $left = "{$leftClause->name} {$leftClause->operator} {$leftClause->value}";
-                break;
+        $conditions = [];
+        foreach ($operator->conditions as $condition) {
+            switch (true) {
+                case $condition instanceof OperatorOr:
+                    $cond = "(" . $this->processOperatorOr($condition) . ")";
+                    break;
+                case $condition instanceof OperatorAnd:
+                    $cond = "(" . $this->processOperatorAnd($condition) . ")";
+                    break;
+                case $condition instanceof ConditionClause:
+                    $cond = "{$condition->name} {$condition->operator} {$condition->value}";
+                    break;
+            }
+            $conditions[] = $cond;
         }
 
-        switch (true) {
-            case $rightClause instanceof OperatorOr:
-                $right = "(" . $this->processOperatorOr($rightClause) . ")";
-                break;
-            case $rightClause instanceof OperatorAnd:
-                $right = "(" . $this->processOperatorAnd($rightClause) . ")";
-                break;
-            case $rightClause instanceof ConditionClause:
-                $right = "{$rightClause->name} {$rightClause->operator} {$rightClause->value}";
-                break;
-        }
-
-        return "{$left} AND {$right}";
+        return implode(" AND ", $conditions);
     }
-
 }
