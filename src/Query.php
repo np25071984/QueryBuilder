@@ -10,7 +10,7 @@ use np25071984\QueryBuilder\Operators\OperatorAnd;
 readonly class Query
 {
     public function __construct(
-        public SelectClause $selectClause, // TODO: DeleteClause, UpdateClause
+        public SelectClause|DeleteClause|UpdateClause $selectClause,
         public FromClause $fromClause,
         public ?WhereClause $whereClause = null,
         readonly public ?string $alias = null,

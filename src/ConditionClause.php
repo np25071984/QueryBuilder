@@ -12,9 +12,4 @@ readonly class ConditionClause
         public string $value,
     ) {
     }
-
-    // public function toSql(): string
-    // {
-    //     return "{$this->name} {$this->operator} {$this->value}";
-    // }
 }

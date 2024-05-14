@@ -37,14 +37,4 @@ class FromClause
     {
         return $this->tables;
     }
-
-    // public function toSql(): string
-    // {
-    //     $tables = [];
-    //     foreach($this->tables as $tbl) {
-    //         $tables[] = $tbl->toSql();
-    //     }
-
-    //     return "FROM " . implode(", ", $tables);
-    // }
 }

@@ -1,5 +1,7 @@
 # QueryBuilder
 
+Proof of concept stage
+
 ## Features
 1. A number of advantages over strings manipulation
 2. Different converters (MySQL, PostgreSQL, Oracle, etc)

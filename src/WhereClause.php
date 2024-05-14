@@ -29,14 +29,4 @@ class WhereClause
         {
             return $this->conditions;
         }
-
-        // public function toSql(): string
-        // {
-        //     $conditions = [];
-        //     foreach($this->conditions as $tbl) {
-        //         $conditions[] = $tbl->toSql();
-        //     }
-
-        //     return "WHERE " . implode(" AND ", $conditions);
-        // }
 }
