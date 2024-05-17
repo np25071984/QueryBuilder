@@ -7,7 +7,6 @@ namespace np25071984\QueryBuilder\Converters;
 use np25071984\QueryBuilder\Query;
 use np25071984\QueryBuilder\ColumnClause;
 use np25071984\QueryBuilder\TableClause;
-use np25071984\QueryBuilder\ConditionClause;
 use np25071984\QueryBuilder\Conditions\ConditionEqual;
 use np25071984\QueryBuilder\Conditions\ConditionGreaterThan;
 use np25071984\QueryBuilder\Conditions\ConditionIn;
@@ -48,7 +47,8 @@ class MySqlConverter
                     }
                     break;
                 case $table instanceof Query:
-                    $tables[] = "(" . $table->toSql() . ")  " . $table->alias;
+                    $subquerySql = $this->convertToSql($table);
+                    $tables[] = "(" . $subquerySql . ")  " . $table->alias;
                     break;
             }
         }
@@ -93,7 +93,8 @@ class MySqlConverter
                     }
                     break;
                 case $column instanceof Query:
-                    $columns[] = "(" . $column->toSql() . ") AS " . $column->alias;
+                    $subquerySql = $this->convertToSql($column);
+                    $columns[] = "(" . $subquerySql . ") AS " . $column->alias;
                     break;
             }
         }
@@ -109,7 +110,8 @@ class MySqlConverter
                     $updates[] = "{$update->column} = {$update->value}";
                     break;
                 case $update->value instanceof Query:
-                    $updates[] = "{$update->column} = ({$update->value->toSql()})";
+                    $subquerySql = $this->convertToSql($update->value);
+                    $updates[] = "{$update->column} = ({$subquerySql})";
                     break;
             }
 
