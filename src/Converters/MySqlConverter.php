@@ -8,6 +8,11 @@ use np25071984\QueryBuilder\Query;
 use np25071984\QueryBuilder\ColumnClause;
 use np25071984\QueryBuilder\TableClause;
 use np25071984\QueryBuilder\ConditionClause;
+use np25071984\QueryBuilder\Conditions\ConditionEqual;
+use np25071984\QueryBuilder\Conditions\ConditionGreaterThan;
+use np25071984\QueryBuilder\Conditions\ConditionIn;
+use np25071984\QueryBuilder\Conditions\ConditionInterface;
+use np25071984\QueryBuilder\Conditions\ConditionNull;
 use np25071984\QueryBuilder\DeleteClause;
 use np25071984\QueryBuilder\UpdateClause;
 use np25071984\QueryBuilder\Operators\OperatorOr;
@@ -58,7 +63,7 @@ class MySqlConverter
             $conditions = [];
             foreach ($query->whereClause->getConditions() as $condition) {
                 switch(true) {
-                    case $condition instanceof ConditionClause:
+                    case $condition instanceof ConditionInterface:
                         $conditions[] = $this->processConditionClause($condition);
                         break;
                     case $condition instanceof OperatorOr:
@@ -112,11 +117,6 @@ class MySqlConverter
         return "UPDATE %s SET " . implode(", ", $updates);
     }
 
-    private function processConditionClause(ConditionClause $condition): string
-    {
-        return "{$condition->name} {$condition->operator} {$condition->value}";
-    }
-
     private function processOperatorOr(OperatorOr $operator): string
     {
         $conditions = [];
@@ -128,8 +128,8 @@ class MySqlConverter
                 case $condition instanceof OperatorAnd:
                     $cond = "(" . $this->processOperatorAnd($condition) . ")";
                     break;
-                case $condition instanceof ConditionClause:
-                    $cond = "{$condition->name} {$condition->operator} {$condition->value}";
+                case $condition instanceof ConditionInterface:
+                    $cond = $this->processConditionClause($condition);
                     break;
             }
             $conditions[] = $cond;
@@ -149,13 +149,31 @@ class MySqlConverter
                 case $condition instanceof OperatorAnd:
                     $cond = "(" . $this->processOperatorAnd($condition) . ")";
                     break;
-                case $condition instanceof ConditionClause:
-                    $cond = "{$condition->name} {$condition->operator} {$condition->value}";
+                case $condition instanceof ConditionInterface:
+                    $cond = $this->processConditionClause($condition);
                     break;
             }
             $conditions[] = $cond;
         }
 
         return implode(" AND ", $conditions);
+    }
+
+    private function processConditionClause(ConditionInterface $condition): string
+    {
+        switch (true) {
+            case $condition instanceof ConditionIn:
+                return sprintf("{$condition->name} IN (%s)", implode(", ", $condition->values));
+                break;
+            case $condition instanceof ConditionEqual:
+                return "{$condition->nameLeft} = {$condition->nameRight}";
+                break;
+            case $condition instanceof ConditionGreaterThan:
+                return "{$condition->name} > {$condition->value}";
+                break;
+            case $condition instanceof ConditionNull:
+                return "{$condition->name} IS NULL";
+                break;
+            }
     }
 }
