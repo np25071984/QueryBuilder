@@ -16,6 +16,7 @@ use np25071984\QueryBuilder\DeleteClause;
 use np25071984\QueryBuilder\UpdateClause;
 use np25071984\QueryBuilder\Operators\OperatorOr;
 use np25071984\QueryBuilder\Operators\OperatorAnd;
+use np25071984\QueryBuilder\OrderColumnClause;
 use np25071984\QueryBuilder\SelectClause;
 
 class MySqlConverter
@@ -75,6 +76,26 @@ class MySqlConverter
                 }
             }
             $sql .= " WHERE " . implode(" ", $conditions);
+        }
+
+        if (!is_null($query->orderByClause)) {
+            $columns = [];
+            foreach ($query->orderByClause->getColumns() as $column) {
+                switch (true) {
+                    case $column instanceof OrderColumnClause:
+                        if (is_null($column->orderType)) {
+                            $columns[] = $column->column;
+                        } else {
+                            $columns[] = $column->column . " " . $column->orderType->value;
+                        }
+                        break;
+                    case $column instanceof Query:
+                        $subquerySql = $this->convertToSql($column);
+                        $columns[] = "(" . $subquerySql . ")";
+                        break;
+                }
+            }
+            $sql .= " ORDER BY " . implode(", ", $columns);
         }
 
         return $sql;

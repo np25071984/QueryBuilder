@@ -10,7 +10,8 @@ readonly class Query
         public SelectClause|DeleteClause|UpdateClause $selectClause,
         public FromClause $fromClause,
         public ?WhereClause $whereClause = null,
-        readonly public ?string $alias = null,
+        public ?OrderByClause $orderByClause = null,
+        public ?string $alias = null,
     ) {
     }
 }
