@@ -21,7 +21,7 @@ use np25071984\QueryBuilder\SelectClause;
 
 class MySqlConverter
 {
-    public function convertToSql(Query $query): string
+    public function convertToString(Query $query): string
     {
         $sql = "";
 
@@ -48,7 +48,7 @@ class MySqlConverter
                     }
                     break;
                 case $table instanceof Query:
-                    $subquerySql = $this->convertToSql($table);
+                    $subquerySql = $this->convertToString($table);
                     $tables[] = "(" . $subquerySql . ")  " . $table->alias;
                     break;
             }
@@ -90,12 +90,19 @@ class MySqlConverter
                         }
                         break;
                     case $column instanceof Query:
-                        $subquerySql = $this->convertToSql($column);
+                        $subquerySql = $this->convertToString($column);
                         $columns[] = "(" . $subquerySql . ")";
                         break;
                 }
             }
             $sql .= " ORDER BY " . implode(", ", $columns);
+        }
+
+        if (!is_null($query->limitClause)) {
+            $sql .= " LIMIT " . $query->limitClause->limit;
+            if ($query->limitClause->offset !== 0) {
+                $sql .= " OFFSET " . $query->limitClause->offset;
+            }
         }
 
         return $sql;
@@ -114,7 +121,7 @@ class MySqlConverter
                     }
                     break;
                 case $column instanceof Query:
-                    $subquerySql = $this->convertToSql($column);
+                    $subquerySql = $this->convertToString($column);
                     $columns[] = "(" . $subquerySql . ") AS " . $column->alias;
                     break;
             }
@@ -131,7 +138,7 @@ class MySqlConverter
                     $updates[] = "{$update->column} = {$update->value}";
                     break;
                 case $update->value instanceof Query:
-                    $subquerySql = $this->convertToSql($update->value);
+                    $subquerySql = $this->convertToString($update->value);
                     $updates[] = "{$update->column} = ({$subquerySql})";
                     break;
             }

@@ -11,6 +11,7 @@ readonly class Query
         public FromClause $fromClause,
         public ?WhereClause $whereClause = null,
         public ?OrderByClause $orderByClause = null,
+        public ?LimitClause $limitClause = null,
         public ?string $alias = null,
     ) {
     }
