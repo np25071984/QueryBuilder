@@ -6,36 +6,26 @@ namespace np25071984\QueryBuilder;
 
 class SelectClause
 {
-    /** @var ColumnClause|Query[] $columns */
-    private $columns = [];
+    /** @var ColumnClause[]|Query[] $columns */
+    private $columns;
 
     public function __construct(string|array|Column|Query $value) {
         // TODO: validate input
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        $this->columns = array_map([$this, "processInputItem"], $value);
+    }
+
+    private function processInputItem(string|Column|Query $value): Column|Query
+    {
         switch (true) {
             case is_string($value):
-                $this->columns[] = new Column($value);
-                break;
-            case is_array($value):
-                foreach($value as $val) {
-                    switch (true) {
-                        case is_string($value):
-                            $this->columns[] = new Column($value);
-                            break;
-                        case $val instanceof Column:
-                            $this->columns[] = $val;
-                            break;
-                        case $val instanceof Query:
-                            $this->columns[] = $val;
-                            break;
-                    }
-                }
-                break;
+                return new Column($value);
             case $value instanceof Column:
-                $this->columns[] = $value;
-                break;
             case $value instanceof Query:
-                $this->columns[] = $value;
-                break;
+                return $value;
         }
     }
 

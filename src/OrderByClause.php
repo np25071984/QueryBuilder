@@ -8,36 +8,26 @@ use np25071984\QueryBuilder\OrderColumnClause;
 
 class OrderByClause
 {
-    /** @var OrderColumnClause|Query[] $columns */
-    private $columns = [];
+    /** @var OrderColumnClause[]|Query[] $columns */
+    private $columns;
 
     public function __construct(string|array|Order|Query $value) {
         // TODO: validate input
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        $this->columns = array_map([$this, "processInputItem"], $value);
+    }
+
+    private function processInputItem(string|Order|Query $value): Order|Query
+    {
         switch (true) {
             case is_string($value):
-                $this->columns[] = new Order($value); // TODO: parse ASC/DESC
-                break;
-            case is_array($value):
-                foreach($value as $val) {
-                    switch (true) {
-                        case is_string($value):
-                            $this->columns[] = new Order($value);
-                            break;
-                        case $val instanceof Order:
-                            $this->columns[] = $val;
-                            break;
-                        case $val instanceof Query:
-                            $this->columns[] = $val;
-                            break;
-                    }
-                }
-                break;
+                return new Order($value); // TODO: parse ASC/DESC
             case $value instanceof Order:
-                $this->columns[] = $value;
-                break;
             case $value instanceof Query:
-                $this->columns[] = $value;
-                break;
+                return $value;
         }
     }
 
