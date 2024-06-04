@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace np25071984\QueryBuilder\Converters;
 
 use np25071984\QueryBuilder\Query;
-use np25071984\QueryBuilder\ColumnClause;
-use np25071984\QueryBuilder\TableClause;
+use np25071984\QueryBuilder\Column;
+use np25071984\QueryBuilder\Table;
 use np25071984\QueryBuilder\Conditions\ConditionEqual;
 use np25071984\QueryBuilder\Conditions\ConditionGreaterThan;
 use np25071984\QueryBuilder\Conditions\ConditionIn;
@@ -16,8 +16,9 @@ use np25071984\QueryBuilder\DeleteClause;
 use np25071984\QueryBuilder\UpdateClause;
 use np25071984\QueryBuilder\Operators\OperatorOr;
 use np25071984\QueryBuilder\Operators\OperatorAnd;
-use np25071984\QueryBuilder\OrderColumnClause;
+use np25071984\QueryBuilder\Order;
 use np25071984\QueryBuilder\SelectClause;
+use np25071984\QueryBuilder\Enums\QueryTypeEnum;
 
 class MySqlConverter
 {
@@ -25,22 +26,23 @@ class MySqlConverter
     {
         $sql = "";
 
-        switch (true) {
-            case $query->selectClause instanceof SelectClause:
-                $sql .= $this->processSelectClause($query->selectClause);
+        $type = $query->getType();
+        switch ($type) {
+            case QueryTypeEnum::SELECT:
+                $sql .= $this->processSelectClause($query->getSelectClause());
                 break;
-            case $query->selectClause instanceof DeleteClause:
+            case QueryTypeEnum::DELETE:
                 $sql .= "DELETE";
                 break;
-            case $query->selectClause instanceof UpdateClause:
-                $sql .= $this->processUpdateClause($query->selectClause);
+            case QueryTypeEnum::UPDATE:
+                $sql .= $this->processUpdateClause($query->getUpdateClause());
                 break;
         }
 
         $tables = [];
-        foreach ($query->fromClause->getTables() as $table) {
+        foreach ($query->getFromClause()->getTables() as $table) {
             switch (true) {
-                case $table instanceof TableClause:
+                case $table instanceof Table:
                     if (is_null($table->alias)) {
                         $tables[] = $table->table;
                     } else {
@@ -49,20 +51,21 @@ class MySqlConverter
                     break;
                 case $table instanceof Query:
                     $subquerySql = $this->convertToString($table);
-                    $tables[] = "(" . $subquerySql . ")  " . $table->alias;
+                    $tables[] = "(" . $subquerySql . ")  " . $table->getAlias();
                     break;
             }
         }
         $tablesStr = implode(", ", $tables);
-        if ($query->selectClause instanceof UpdateClause) {
+        if ($type === QueryTypeEnum::UPDATE) {
             $sql = sprintf($sql, $tablesStr);
         } else {
             $sql .= " FROM {$tablesStr}";
         }
 
-        if (!is_null($query->whereClause)) {
+        $whereClause = $query->getWhereClause();
+        if (!is_null($whereClause)) {
             $conditions = [];
-            foreach ($query->whereClause->getConditions() as $condition) {
+            foreach ($whereClause->getConditions() as $condition) {
                 switch(true) {
                     case $condition instanceof ConditionInterface:
                         $conditions[] = $this->processConditionClause($condition);
@@ -78,11 +81,12 @@ class MySqlConverter
             $sql .= " WHERE " . implode(" ", $conditions);
         }
 
-        if (!is_null($query->orderByClause)) {
+        $orderByClause = $query->getOrderByClause();
+        if (!is_null($orderByClause)) {
             $columns = [];
-            foreach ($query->orderByClause->getColumns() as $column) {
+            foreach ($orderByClause->getColumns() as $column) {
                 switch (true) {
-                    case $column instanceof OrderColumnClause:
+                    case $column instanceof Order:
                         if (is_null($column->orderType)) {
                             $columns[] = $column->column;
                         } else {
@@ -91,17 +95,18 @@ class MySqlConverter
                         break;
                     case $column instanceof Query:
                         $subquerySql = $this->convertToString($column);
-                        $columns[] = "(" . $subquerySql . ")";
+                        $columns[] = "(" . $subquerySql . ") " . $column->getAlias();
                         break;
                 }
             }
             $sql .= " ORDER BY " . implode(", ", $columns);
         }
 
-        if (!is_null($query->limitClause)) {
-            $sql .= " LIMIT " . $query->limitClause->limit;
-            if ($query->limitClause->offset !== 0) {
-                $sql .= " OFFSET " . $query->limitClause->offset;
+        $limitClause = $query->getLimitClause();
+        if (!is_null($limitClause)) {
+            $sql .= " LIMIT " . $limitClause->limit;
+            if ($limitClause->offset !== 0) {
+                $sql .= " OFFSET " . $limitClause->offset;
             }
         }
 
@@ -113,7 +118,7 @@ class MySqlConverter
         $columns = [];
         foreach ($clause->getColumns() as $column) {
             switch (true) {
-                case $column instanceof ColumnClause:
+                case $column instanceof Column:
                     if (is_null($column->alias)) {
                         $columns[] = $column->name;
                     } else {
@@ -122,7 +127,7 @@ class MySqlConverter
                     break;
                 case $column instanceof Query:
                     $subquerySql = $this->convertToString($column);
-                    $columns[] = "(" . $subquerySql . ") AS " . $column->alias;
+                    $columns[] = "(" . $subquerySql . ") AS " . $column->getAlias();
                     break;
             }
         }

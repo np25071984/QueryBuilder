@@ -11,19 +11,19 @@ class OrderByClause
     /** @var OrderColumnClause|Query[] $columns */
     private $columns = [];
 
-    public function __construct(string|array|OrderColumnClause|Query $value) {
+    public function __construct(string|array|Order|Query $value) {
         // TODO: validate input
         switch (true) {
             case is_string($value):
-                $this->columns[] = new OrderColumnClause($value); // TODO: parse ASC/DESC
+                $this->columns[] = new Order($value); // TODO: parse ASC/DESC
                 break;
             case is_array($value):
                 foreach($value as $val) {
                     switch (true) {
                         case is_string($value):
-                            $this->columns[] = new OrderColumnClause($value);
+                            $this->columns[] = new Order($value);
                             break;
-                        case $val instanceof OrderColumnClause:
+                        case $val instanceof Order:
                             $this->columns[] = $val;
                             break;
                         case $val instanceof Query:
@@ -32,7 +32,7 @@ class OrderByClause
                     }
                 }
                 break;
-            case $value instanceof OrderColumnClause:
+            case $value instanceof Order:
                 $this->columns[] = $value;
                 break;
             case $value instanceof Query:

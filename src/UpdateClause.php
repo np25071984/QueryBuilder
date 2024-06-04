@@ -9,13 +9,13 @@ class UpdateClause
     /** @var SetClause|Query[] $updates */
     private $updates = [];
 
-    public function __construct(array|SetClause|Query $value) {
+    public function __construct(array|Set|Query $value) {
         // TODO: validate input
         switch (true) {
             case is_array($value):
                 foreach($value as $val) {
                     switch (true) {
-                        case $val instanceof SetClause:
+                        case $val instanceof Set:
                             $this->updates[] = $val;
                             break;
                         case $val instanceof Query:
@@ -24,7 +24,7 @@ class UpdateClause
                     }
                 }
                 break;
-            case $value instanceof SetClause:
+            case $value instanceof Set:
                 $this->updates[] = $value;
                 break;
             case $value instanceof Query:

@@ -9,19 +9,19 @@ class SelectClause
     /** @var ColumnClause|Query[] $columns */
     private $columns = [];
 
-    public function __construct(string|array|ColumnClause|Query $value) {
+    public function __construct(string|array|Column|Query $value) {
         // TODO: validate input
         switch (true) {
             case is_string($value):
-                $this->columns[] = new ColumnClause($value);
+                $this->columns[] = new Column($value);
                 break;
             case is_array($value):
                 foreach($value as $val) {
                     switch (true) {
                         case is_string($value):
-                            $this->columns[] = new ColumnClause($value);
+                            $this->columns[] = new Column($value);
                             break;
-                        case $val instanceof ColumnClause:
+                        case $val instanceof Column:
                             $this->columns[] = $val;
                             break;
                         case $val instanceof Query:
@@ -30,7 +30,7 @@ class SelectClause
                     }
                 }
                 break;
-            case $value instanceof ColumnClause:
+            case $value instanceof Column:
                 $this->columns[] = $value;
                 break;
             case $value instanceof Query:

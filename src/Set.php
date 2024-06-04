@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace np25071984\QueryBuilder;
 
-readonly class ColumnClause
+readonly class Set
 {
     public function __construct(
-        public string $name,
-        public ?string $alias = null,
+        public string $column,
+        public string|Query $value,
     ) {
     }
 }

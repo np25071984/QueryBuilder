@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace np25071984\QueryBuilder;
 
-readonly class TableClause
+readonly class Table
 {
     public function __construct(
         public string $table,
