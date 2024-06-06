@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace np25071984\QueryBuilder;
+namespace np25071984\QueryBuilder\Clauses;
+
+use np25071984\QueryBuilder\Queries\AbstractQuery;
+use np25071984\QueryBuilder\Primitives\Table;
 
 class FromClause
 {
@@ -19,7 +22,7 @@ class FromClause
         $this->tables = array_map([$this, "processInputItem"], $value);
     }
 
-    private function processInputItem(string|Table|Query $value): Table|Query
+    private function processInputItem(string|Table|AbstractQuery $value): Table|AbstractQuery
     {
         if (is_string($value)) {
             return new Table($value);

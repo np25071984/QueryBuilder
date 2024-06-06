@@ -11,8 +11,9 @@ Proof of concept stage
 
 1. Domain models which are used to create SQL query
 2. The models understand a _raw sql fragments_
-3. `Query` class takes a completed _raw sql query_ and transforms it into the domain models for future monipulations
+3. Lexical Analysis; translate _raw sql query_ into the domain models for future monipulations
 
 ## TODO
-1. API
-2. Validation
+1. finalize API
+2. add Validation
+3. implement Factory/Facade design pattern for convenience (it is tedious to create that many objects manually)

@@ -4,40 +4,34 @@ declare(strict_types=1);
 
 namespace np25071984\QueryBuilder\Converters;
 
-use np25071984\QueryBuilder\Query;
-use np25071984\QueryBuilder\Column;
-use np25071984\QueryBuilder\Table;
+use np25071984\QueryBuilder\Primitives\Column;
+use np25071984\QueryBuilder\Primitives\Table;
 use np25071984\QueryBuilder\Conditions\ConditionEqual;
 use np25071984\QueryBuilder\Conditions\ConditionGreaterThan;
 use np25071984\QueryBuilder\Conditions\ConditionIn;
 use np25071984\QueryBuilder\Conditions\ConditionInterface;
 use np25071984\QueryBuilder\Conditions\ConditionNull;
-use np25071984\QueryBuilder\DeleteClause;
-use np25071984\QueryBuilder\UpdateClause;
+use np25071984\QueryBuilder\Clauses\DeleteClause;
+use np25071984\QueryBuilder\Clauses\UpdateClause;
 use np25071984\QueryBuilder\Operators\OperatorOr;
 use np25071984\QueryBuilder\Operators\OperatorAnd;
-use np25071984\QueryBuilder\Order;
-use np25071984\QueryBuilder\SelectClause;
-use np25071984\QueryBuilder\Enums\QueryTypeEnum;
+use np25071984\QueryBuilder\Primitives\Order;
+use np25071984\QueryBuilder\Clauses\SelectClause;
+use np25071984\QueryBuilder\Queries\AbstractQuery;
+use np25071984\QueryBuilder\Queries\SelectQuery;
+use np25071984\QueryBuilder\Queries\UpdateQuery;
 
 class MySqlConverter
 {
-    public function convertToString(Query $query): string
+    public function convertToString(AbstractQuery $query): string
     {
         $sql = "";
 
-        $type = $query->getType();
-        switch ($type) {
-            case QueryTypeEnum::SELECT:
-                $sql .= $this->processSelectClause($query->getSelectClause());
-                break;
-            case QueryTypeEnum::DELETE:
-                $sql .= "DELETE";
-                break;
-            case QueryTypeEnum::UPDATE:
-                $sql .= $this->processUpdateClause($query->getUpdateClause());
-                break;
+        if (!($query instanceof SelectQuery)) {
+            return $sql;
         }
+
+        $sql .= $this->processSelectClause($query->getSelectClause());
 
         $tables = [];
         foreach ($query->getFromClause()->getTables() as $table) {
@@ -49,14 +43,14 @@ class MySqlConverter
                         $tables[] = $table->table . " " . $table->alias;
                     }
                     break;
-                case $table instanceof Query:
+                case $table instanceof AbstractQuery:
                     $subquerySql = $this->convertToString($table);
                     $tables[] = "(" . $subquerySql . ")  " . $table->getAlias();
                     break;
             }
         }
         $tablesStr = implode(", ", $tables);
-        if ($type === QueryTypeEnum::UPDATE) {
+        if ($query instanceof UpdateQuery) {
             $sql = sprintf($sql, $tablesStr);
         } else {
             $sql .= " FROM {$tablesStr}";
@@ -93,7 +87,7 @@ class MySqlConverter
                             $columns[] = $column->column . " " . $column->orderType->value;
                         }
                         break;
-                    case $column instanceof Query:
+                    case $column instanceof AbstractQuery:
                         $subquerySql = $this->convertToString($column);
                         $columns[] = "(" . $subquerySql . ") " . $column->getAlias();
                         break;
@@ -125,7 +119,7 @@ class MySqlConverter
                         $columns[] = $column->name . " AS " . $column->alias;
                     }
                     break;
-                case $column instanceof Query:
+                case $column instanceof AbstractQuery:
                     $subquerySql = $this->convertToString($column);
                     $columns[] = "(" . $subquerySql . ") AS " . $column->getAlias();
                     break;
@@ -142,7 +136,7 @@ class MySqlConverter
                 case is_string($update->value):
                     $updates[] = "{$update->column} = {$update->value}";
                     break;
-                case $update->value instanceof Query:
+                case $update->value instanceof AbstractQuery:
                     $subquerySql = $this->convertToString($update->value);
                     $updates[] = "{$update->column} = ({$subquerySql})";
                     break;

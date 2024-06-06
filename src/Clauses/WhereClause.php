@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace np25071984\QueryBuilder;
+namespace np25071984\QueryBuilder\Clauses;
 
 use np25071984\QueryBuilder\Conditions\ConditionInterface;
 
